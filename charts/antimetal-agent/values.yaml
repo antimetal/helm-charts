@@ -1,0 +1,149 @@
+# Default values for antimetal-agent.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: antimetal/agent
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  # tag: ""
+
+imagePullSecrets: []
+
+replicaCount: 1
+
+# Address of the Antimetal API server.
+apiAddress: ""
+# Token to use for the agent to authenticate with the Antimetal API.
+# Either `apiKey` or `apiKeySecretRef` must be set.
+apiKey: ""
+# Name of the secret that contains the API key.
+# It is mutually exclusive with `apiKey`.
+# The referenced secret must provide the api key in data["API_KEY"].
+apiKeySecretRef: ""
+
+logLevel: "info"
+
+# Kubernetes provider configuration.
+provider:
+  # Name of the Kubernetes service provider.
+  # Only "eks" is supported at this time.
+  name: "eks"
+  # eks provider specific options.
+  eks:
+    # Fetch EKS cluster information using the AWS API and AWS EC2 Metadata IMDSv2 endpoint.
+    #
+    # The Antimetal agent requires read-only permissions, so the default AmazonEC2ReadOnlyAccess is
+    # sufficient. You can provide the credentials by adding the AWS_ACCESS_KEY_ID and
+    # AWS_SECRET_ACCESS_KEY environment variables to either extraEnvs or extraEnvsFrom.
+    #
+    # Alternatively, you can use the AWS IAM Role for Service Accounts (IRSA) feature and annotate
+    # the service account in serviceAccount.annotations to add the eks.amazonaws.com/role-arn
+    # annotation referencing your IAM role.
+    #
+    # If you don't want to use either of these options, then set autodiscover to false and explicity
+    # provide the cluster information below.
+    autodiscover: true
+    # Optionally provide EKS cluster information if autodiscover is set to false.
+    # account-id: ""
+    # region: ""
+    # cluster-name: ""
+
+serviceAccount:
+  # Specifies whether a service account for the agent should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+rbac:
+  # create a ClusterRole & ClusterRoleBinding for the agent
+  create: true
+  # Grant access to read 'cluster-info' ConfigMap in the kube-public namespace
+  configMapClusterInfoReadAccess: true
+
+# Metrics server configuration.
+metrics:
+  # Enable the metrics server to expose metrics from the /metrics endpoint on metrics port.
+  # The metrics port is either 8080 or 8443 if secure is set to true.
+  enable: false
+  # Serve metrics from metrics server via https and add authn/authz on the /metrics endpoint.
+  # If set to true, and tls is empty, then a self-signed certificate will be generated
+  # which is not recommended for production use.
+  secure: false
+  # TLS configuration for the metrics server when secure is set to true.
+  # tls:
+  #   # Name of the secret containing the metrics server TLS certificate and key.
+  #   # The secret must be a kubernetes.io/tls secret type.
+  #   secretRef: ""
+
+# Annotations to add to agent pod.
+podAnnotations: {}
+# Additional labels to add to agent pod.
+podLabels: {}
+
+# Additional environment variables to add to the agent container.
+extraEnvs: []
+extraEnvsFrom: []
+
+# Agent pod security context.
+podSecurityContext:
+  runAsNonRoot: true
+
+# Agent container security context.
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+
+# We've elected to not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+resources: {}
+  # limits:
+  #   cpu: 1000m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Agent readiness and liveness probes.
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: health
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: health
+
+# Additional volumes to add to the agent Deployment.
+extraVolumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on add to the agent Deployment.
+extraVolumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+# Node selector for the agent Deployment.
+nodeSelector: {}
+
+# Tolerations for the agent Deployment.
+tolerations: []
+
+# Affinity rules for the agent Deployment.
+affinity: {}

@@ -1,0 +1,15 @@
+{{- if .Values.metrics.enable }}
+{{- if .Values.metrics.secure }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "antimetal-agent.fullname" . }}-metrics-reader-role
+  labels:
+    {{- include "antimetal-agent.labels" . | nindent 4 }}
+rules:
+- nonResourceURLs:
+  - "/metrics"
+  verbs:
+  - get
+{{- end }}
+{{- end }}

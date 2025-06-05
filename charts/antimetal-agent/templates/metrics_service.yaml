@@ -1,0 +1,16 @@
+{{- if .Values.metrics.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "antimetal-agent.fullname" . }}-metrics
+  labels:
+    {{- include "antimetal-agent.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "antimetal-agent.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: {{ .Values.metrics.secure | ternary "https" "http" }}
+      port: {{ .Values.metrics.secure | ternary 443 80 }}
+      protocol: TCP
+      targetPort: metrics
+{{- end }}
