@@ -45,9 +45,6 @@ Selector labels
 {{- define "antimetal-agent.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "antimetal-agent.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 {{- end }}
 
 {{/*

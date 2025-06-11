@@ -1,7 +1,7 @@
 apiVersion: v2
 name: antimetal-agent
-description: A Helm chart for Kubernetes
+description: A Helm chart to deploy the Antimetal agent
 type: application
-version: 0.1.1
+version: 0.1.2
 appVersion: "v0.1.1"
 home: https://antimetal.com
