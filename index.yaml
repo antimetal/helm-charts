@@ -2,6 +2,17 @@ apiVersion: v1
 entries:
   antimetal-agent:
   - apiVersion: v2
+    appVersion: v0.1.1
+    created: "2025-06-11T02:44:08.147592726Z"
+    description: A Helm chart for Kubernetes
+    digest: 6d21cb027e3ffba7ebcff14aa7e3838a6af613473aca70781dd9a0cdc462649f
+    home: https://antimetal.com
+    name: antimetal-agent
+    type: application
+    urls:
+    - https://github.com/antimetal/helm-charts/releases/download/antimetal-agent-0.1.1/antimetal-agent-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
     appVersion: v0.1.0
     created: "2025-06-05T22:09:39.491233676Z"
     description: A Helm chart for Kubernetes
@@ -12,4 +23,4 @@ entries:
     urls:
     - https://github.com/antimetal/helm-charts/releases/download/antimetal-agent-0.1.0/antimetal-agent-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-05T22:09:39.491239486Z"
+generated: "2025-06-11T02:44:08.147600932Z"
