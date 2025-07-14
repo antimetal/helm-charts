@@ -84,6 +84,12 @@ metrics:
   #   # The secret must be a kubernetes.io/tls secret type.
   #   secretRef: ""
 
+pprof:
+  # Enable the pprof server to expose profiling data.
+  # It is not recommended to enable this in production environments.
+  enable: false
+  port: "6060"
+
 # Annotations to add to agent pod.
 podAnnotations: {}
 # Additional labels to add to agent pod.

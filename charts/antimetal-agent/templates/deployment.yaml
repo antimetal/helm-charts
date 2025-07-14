@@ -66,6 +66,9 @@ spec:
             {{- else }}
             - --metrics-bind-address=0
             {{- end }}
+            {{- if .Values.pprof.enable }}
+            - --pprof-address={{ printf ":%s" .Values.pprof.port }}
+            {{- end }}
           env:
             - name: KUBERNETES_NODE_IP
               valueFrom:
