@@ -1,11 +1,10 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: {{ include "antimetal-agent.fullname" . }}
   labels:
     {{- include "antimetal-agent.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "antimetal-agent.selectorLabels" . | nindent 6 }}
@@ -55,6 +54,12 @@ spec:
             {{- range  $key, $value := $providerData }}
             - --kubernetes-provider-{{ $.Values.provider.name }}-{{ $key }}={{ $value }}
             {{- end }}
+            {{- if .Values.performance.enable }}
+            - --enable-performance-collectors
+            {{- end }}
+            {{- if .Values.performance.exporters.otel.enable }}
+            - --enable-otel
+            {{- end }}
             {{- if .Values.metrics.enable }}
             - --metrics-bind-address={{ include "antimetal-agent.metricsServerPort" . | printf ":%s" }}
             - --metrics-secure={{ default false .Values.metrics.secure }}
@@ -78,8 +83,25 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-            {{- with .Values.extraEnvs }}
-            {{- toYaml . | nindent 12 }}
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: HOST_PROC
+              value: /host/proc
+            - name: HOST_SYS
+              value: /host/sys
+            - name: HOST_DEV
+              value: /host/dev
+            - name: HOST_ETC
+              value: /host/etc
+            - name: HOST_VAR
+              value: /host/var
+            - name: HOST_CGROUP
+              value: /host/cgroup
+            {{- range .Values.extraEnvs }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
             {{- end }}
           envFrom:
             - secretRef:
@@ -102,9 +124,29 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if or (and .Values.metrics.enable .Values.metrics.secure .Values.metrics.tls) .Values.extraVolumes }}
           volumeMounts:
-            {{- with .Values.metrics.tls }}
+            - name: data
+              mountPath: /var/lib/antimetal
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+            - name: dev
+              mountPath: /host/dev
+              readOnly: true
+            - name: machine-id
+              mountPath: /host/etc/machine-id
+              readOnly: true
+            - name: dbus
+              mountPath: /host/var/lib/dbus
+              readOnly: true
+            - name: cgroup
+              mountPath: /host/cgroup
+              readOnly: true
+            {{- if and .Values.metrics.enable .Values.metrics.secure }}
+            {{- with required "metrics.tls must be set" .Values.metrics.tls }}
             - name: metrics-tls
               mountPath: /etc/antimetal-agent/tls
               readOnly: true
@@ -113,17 +155,41 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
-      {{- if or (and .Values.metrics.enable .Values.metrics.secure .Values.metrics.tls) .Values.extraVolumes }}
       volumes:
-        {{- with .Values.metrics.tls }}
+        - name: data
+          emptyDir: {}
+        - name: proc
+          hostPath:
+            path: /proc
+            type: Directory
+        - name: sys
+          hostPath:
+            path: /sys
+            type: Directory
+        - name: dev
+          hostPath:
+            path: /dev
+            type: Directory
+        - name: machine-id
+          hostPath:
+            path: /etc/machine-id
+        - name: dbus
+          hostPath:
+            path: /var/lib/dbus
+        - name: cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+            type: Directory
+        {{- if and .Values.metrics.enable .Values.metrics.secure }}
+        {{- with required "metrics.tls must be set" .Values.metrics.tls }}
         - name: metrics-tls
           secret:
-            secretName: {{ required "tls.secretRef must be set" .secretRef }}
+            secretName: {{ required "metrics.tls.secretRef must be set" .secretRef }}
         {{- end }}
-        {{- with .Values.extraVolumes }}
+        {{- end }}
+        {{- with .Values.extravolumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
