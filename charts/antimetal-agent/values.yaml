@@ -13,8 +13,6 @@ image:
 
 imagePullSecrets: []
 
-replicaCount: 1
-
 # Address of the Antimetal API server.
 apiAddress: ""
 # Token to use for the agent to authenticate with the Antimetal API.
@@ -51,6 +49,17 @@ provider:
     # account-id: ""
     # region: ""
     # cluster-name: ""
+
+performance:
+  enable: false
+  exporters:
+    otel:
+      enable: false
+      # Use OTEL & OTLP env vars in extraEnvs to configure Opentelemetry settings
+      # At minimum you will need OTEL_EXPORTER_OTLP_ENDPOINT.
+      # Refer to https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+      # and https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/
+      # for full configuration.
 
 serviceAccount:
   # Specifies whether a service account for the agent should be created
@@ -101,6 +110,8 @@ extraEnvsFrom: []
 
 # Agent pod security context.
 podSecurityContext:
+  fsGroup: 65532
+  runAsUser: 65532
   runAsNonRoot: true
 
 # Agent container security context.
