@@ -74,6 +74,8 @@ spec:
             {{- if .Values.pprof.enable }}
             - --pprof-address={{ printf ":%s" .Values.pprof.port }}
             {{- end }}
+            - --data-directory
+            - ''
           env:
             - name: KUBERNETES_NODE_IP
               valueFrom:
