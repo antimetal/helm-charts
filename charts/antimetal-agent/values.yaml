@@ -116,10 +116,10 @@ podSecurityContext:
 
 # Agent container security context.
 securityContext:
-  allowPrivilegeEscalation: false
+  allowPrivilegeEscalation: true
   capabilities:
-    drop:
-    - ALL
+    add:
+      - CAP_SYSLOG
 
 # We've elected to not to specify default resources and to leave this as a conscious
 # choice for the user. This also increases chances charts run on environments with little
