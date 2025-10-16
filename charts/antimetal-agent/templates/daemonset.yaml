@@ -56,6 +56,8 @@ spec:
             {{- end }}
             {{- if .Values.performance.enable }}
             - --enable-performance-collectors
+            - --config-loader=ams
+            - --config-ams-api-key=$(API_KEY)
             {{- end }}
             {{- if .Values.performance.exporters.otel.enable }}
             - --enable-otel
